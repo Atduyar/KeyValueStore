@@ -1,13 +1,13 @@
 #![allow(dead_code, unused)]
 use std::{collections::HashMap, io::{self, Write}};
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 enum Token {
     Commands(Commands),
     Value(KVValue)
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 enum Commands {
     GET,
     SET,
@@ -16,7 +16,7 @@ enum Commands {
     SUB,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 enum KVValue {
     NUMBER(i64),
     STRING(String),
@@ -75,23 +75,68 @@ fn parse_string(input: String) -> Vec<Token> {
     return tokens;
 }
 
+
 // SET "ahmet" 42
 // SET <string> <KVValue>
 // GET <string>
 // DEL <string>
 // ADD <string>
 // ADD <string> <Number>
-fn interpret_tokens(tokens: Vec<Token>){
-    if tokens.is_empty() {
-        return;
-    }
-    if let Some(Token::Value(_)) = tokens.get(0) {
-        println!("ERROR: First token cannot be a Value");
-        return;
+fn interpret_tokens(db: &mut HashMap<String, KVValue>, tokens: Vec<Token>){
+    match tokens.get(0) {
+        None => {
+            println!("ERROR: Command is empty");
+            return;
+        }
+        Some(Token::Value(_)) =>  {
+            println!("ERROR: First token cannot be a Value");
+            return;
+        },
+        Some(Token::Commands(Commands::GET)) =>  {
+            if let Some(Token::Value(KVValue::STRING(s))) = tokens.get(1) {
+                // TODO: print the value, not the data structure (eg. 1 instead of Token(Number(1))) 
+                // Kayra
+                println!("= {:?}", db.get(s));
+            }
+            else {
+                println!("Usage: GET <String>")
+            }
+        },
+        Some(Token::Commands(Commands::SET)) =>  {
+            if let Some(Token::Value(KVValue::STRING(s))) = tokens.get(1) && let Some(Token::Value(v)) = tokens.get(2) {
+                db.insert(s.clone(), v.clone());
+                println!("OK");
+            }
+            else {
+                println!("Usage: SET <String> <Value>")
+            }
+        },
+        Some(Token::Commands(Commands::DEL)) =>  {
+            // TODO: Implement hash map delete
+            // Taylan
+        },
+        Some(Token::Commands(Commands::ADD)) =>  {
+            if let Some(Token::Value(KVValue::STRING(s))) = tokens.get(1) && let Some(Token::Value(KVValue::NUMBER(n))) = tokens.get(2) {
+                if let Some(KVValue::NUMBER(num)) = db.get(s) {
+                    db.insert(s.clone(), KVValue::NUMBER(num + n));
+                    println!("OK");
+                }
+            }
+            else {
+                println!("Usage: ADD <String>")
+            }
+        },
+        _ => {
+            // TODO: print something
+            // Anyone
+            return;
+        }
     }
 }
 
 fn main() {
+    let mut db: HashMap<String, KVValue> = HashMap::new();
+
     loop {
         let mut input = String::new();
         print!(">> ");
@@ -109,7 +154,7 @@ fn main() {
 
         println!("TOKENS = {:?}", tokens);
 
-        interpret_tokens(tokens);
+        interpret_tokens(&mut db, tokens);
     }
 }
 
