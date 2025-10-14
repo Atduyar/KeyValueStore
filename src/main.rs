@@ -31,7 +31,7 @@ enum KVValue {
 //
 // [SET STRING("ahmet") NUMBER(23)]
 fn parse_string(input: String) -> Vec<Token> {
-    // TODO: "ahmet Tarik" 2 token olarak aliyor. Bu tek Token olmali.
+    // TODO: "Ahmet Tarik" 2 token olarak aliyor. Bu tek Token olmali.
     // Atduyar
     let token_strings = input.split_whitespace().collect::<Vec<&str>>();
     let mut tokens: Vec<Token> = Vec::new();
@@ -46,33 +46,28 @@ fn parse_string(input: String) -> Vec<Token> {
             "true"  => tokens.push(Token::Value(KVValue::BOOL(true))),
             "false" => tokens.push(Token::Value(KVValue::BOOL(false))),
             _ => {
-                match token.get(..1) {
-                    Some("\"") => {
-                        let mut string_literal = token.to_string();
-                        if token.chars().last().unwrap_or(' ') != '"' {
-                            println!("Invalid String.");
-                            break;
-                        }
-                        tokens.push(Token::Value(KVValue::STRING(string_literal.trim_matches(&['"'] as &[_]).to_string())));
+                let first_char = token.chars().next();
+                match first_char {
+                    None => {
+                        continue;
                     },
-                    Some("0")|
-                    Some("1")|
-                    Some("2")|
-                    Some("3")|
-                    Some("4")|
-                    Some("5")|
-                    Some("6")|
-                    Some("7")|
-                    Some("8")|
-                    Some("9")
-                    => {
+                    Some('"') => {
+                        let string_literal = token.chars().skip(1).take_while(|&c| c != '"').collect();
+                        tokens.push(Token::Value(KVValue::STRING(string_literal)));
+                        continue;
+                    }
+                    Some(c) if c.is_ascii_digit() || c == '-' => {
                         // TODO: int parse need to be chacked. eg. token "2test" start with
                         // number but is not a valid number.
                         // Kayra
                         let token = Token::Value(KVValue::NUMBER(token.parse::<i64>().unwrap()));
-                        tokens.push(token)
-                    },
-                    _ => println!("Unkonwn token.")
+                        tokens.push(token);
+                        continue;
+                    }
+                    Some(_) => {
+                        println!("Error: Unrecognized token '{}'.", token);
+                        break;
+                    }
                 }
             }
         }
