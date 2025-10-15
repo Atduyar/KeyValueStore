@@ -142,10 +142,20 @@ fn main() {
         print!(">> ");
         io::stdout().flush().expect("Failed to flush stdout");
 
-        // TODO: stdin can be closed. in this case of None program should escape from the loop.
-        // Taylan
-        io::stdin().read_line(&mut input).unwrap();
 
+        let result=io::stdin().read_line(&mut input);
+
+        match result {
+            Ok(0)=>{
+                println!("\nGoodbye (end of file detected");
+                break;
+            }
+            Ok(_)=>{ }
+            Err(e)=>{
+            eprintln!("Error : {}",e);
+            break;
+            }
+        }
         if (input.trim() == ".quit") {
             break;
         }
