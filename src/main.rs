@@ -91,7 +91,7 @@ fn interpret_tokens(db: &mut HashMap<String, KVValue>, tokens: Vec<Token>){
         Some(Token::Value(_)) =>  {
             println!("ERROR: First token cannot be a Value");
             return;
-        },
+        }
         Some(Token::Commands(Commands::GET)) =>  {
             if let Some(Token::Value(KVValue::STRING(s))) = tokens.get(1) {
                 // TODO: print the value, not the data structure (eg. 1 instead of Token(Number(1))) 
@@ -101,7 +101,7 @@ fn interpret_tokens(db: &mut HashMap<String, KVValue>, tokens: Vec<Token>){
             else {
                 println!("Usage: GET <String>")
             }
-        },
+        }
         Some(Token::Commands(Commands::SET)) =>  {
             if let Some(Token::Value(KVValue::STRING(s))) = tokens.get(1) && let Some(Token::Value(v)) = tokens.get(2) {
                 db.insert(s.clone(), v.clone());
@@ -110,7 +110,7 @@ fn interpret_tokens(db: &mut HashMap<String, KVValue>, tokens: Vec<Token>){
             else {
                 println!("Usage: SET <String> <Value>")
             }
-        },
+        }
         Some(Token::Commands(Commands::DEL)) =>  {
             if tokens.len() > 1 {
                 match &tokens[1] {
@@ -124,23 +124,36 @@ fn interpret_tokens(db: &mut HashMap<String, KVValue>, tokens: Vec<Token>){
             else {
                 println!("Usage: DEL <key>");
             }
-
-        },
+        }
         Some(Token::Commands(Commands::ADD)) =>  {
-            if let Some(Token::Value(KVValue::STRING(s))) = tokens.get(1) && let Some(Token::Value(KVValue::NUMBER(n))) = tokens.get(2) {
+            if let Some(Token::Value(KVValue::STRING(s))) = tokens.get(1) {
+                let n = match tokens.get(2) {
+                    Some(Token::Value(KVValue::NUMBER(num))) => *num,
+                    _ => 1,
+                };
                 if let Some(KVValue::NUMBER(num)) = db.get(s) {
                     db.insert(s.clone(), KVValue::NUMBER(num + n));
                     println!("OK");
                 }
             }
             else {
-                println!("Usage: ADD <String>")
+                println!("Usage: ADD <String> [Number]")
             }
-        },
-        _ => {
-            // TODO: print something
-            // Anyone
-            return;
+        }
+        Some(Token::Commands(Commands::SUB)) =>  {
+            if let Some(Token::Value(KVValue::STRING(s))) = tokens.get(1) {
+                let n = match tokens.get(2) {
+                    Some(Token::Value(KVValue::NUMBER(num))) => *num,
+                    _ => 1,
+                };
+                if let Some(KVValue::NUMBER(num)) = db.get(s) {
+                    db.insert(s.clone(), KVValue::NUMBER(num - n));
+                    println!("OK");
+                }
+            }
+            else {
+                println!("Usage: SUB <String> [Number]")
+            }
         }
     }
 }
