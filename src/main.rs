@@ -112,8 +112,19 @@ fn interpret_tokens(db: &mut HashMap<String, KVValue>, tokens: Vec<Token>){
             }
         },
         Some(Token::Commands(Commands::DEL)) =>  {
-            // TODO: Implement hash map delete
-            // Taylan
+            if tokens.len() > 1 {
+                match &tokens[1] {
+                    Token::Value(KVValue::STRING(key)) => {
+                        db.remove(key);
+                        println!("Deleted key: {}", key);
+                    }
+                    _ => println!("Error: Expected a string value"),
+                }
+            }
+            else {
+                println!("Usage: DEL <key>");
+            }
+
         },
         Some(Token::Commands(Commands::ADD)) =>  {
             if let Some(Token::Value(KVValue::STRING(s))) = tokens.get(1) && let Some(Token::Value(KVValue::NUMBER(n))) = tokens.get(2) {
@@ -144,7 +155,6 @@ fn main() {
 
 
         let result=io::stdin().read_line(&mut input);
-
         match result {
             Ok(0)=>{
                 println!("\nGoodbye (end of file detected");
@@ -156,6 +166,7 @@ fn main() {
             break;
             }
         }
+
         if (input.trim() == ".quit") {
             break;
         }
