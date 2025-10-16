@@ -154,17 +154,16 @@ fn main() {
         io::stdout().flush().expect("Failed to flush stdout");
 
 
-        let result=io::stdin().read_line(&mut input);
-        match result {
-            Ok(0)=>{
-                println!("\nGoodbye (end of file detected");
+        match io::stdin().read_line(&mut input) {
+            Ok(0) => {
+                println!("\nGoodbye (end of file detected)");
                 break;
             }
-            Ok(_)=>{ }
-            Err(e)=>{
-            eprintln!("Error : {}",e);
-            break;
+            Err(e) => {
+                eprintln!("Error : {}", e);
+                break;
             }
+            Ok(_) => ()
         }
 
         if (input.trim() == ".quit") {
