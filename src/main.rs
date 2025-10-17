@@ -56,12 +56,16 @@ fn parse_string(input: String) -> Vec<Token> {
                         tokens.push(Token::Value(KVValue::STRING(string_literal)));
                         continue;
                     }
-                    Some(c) if c.is_ascii_digit() || c == '-' => {
-                        // TODO: int parse need to be chacked. eg. token "2test" start with
-                        // number but is not a valid number.
-                        // Kayra
-                        let token = Token::Value(KVValue::NUMBER(token.parse::<i64>().unwrap()));
-                        tokens.push(token);
+                    Some(c) if c.is_ascii_digit() || c == '-' || c == '+' => {
+                        match token.parse::<i64>() {
+                            Ok(num) => {
+                                let token = Token::Value(KVValue::NUMBER(num));
+                                tokens.push(token);
+                            }
+                            Err(_) => {
+                                println!("Error: '{}' is not a valid number.", token);
+                            }
+                        }
                         continue;
                     }
                     Some(_) => {
