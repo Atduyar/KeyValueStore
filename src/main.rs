@@ -131,9 +131,10 @@ fn interpret_tokens(db: &mut HashMap<String, KVValue>, tokens: Vec<Token>){
         }
         Some(Token::Commands(Commands::ADD)) =>  {
             if let Some(Token::Value(KVValue::STRING(s))) = tokens.get(1) {
-                let n = match tokens.get(2) {
-                    Some(Token::Value(KVValue::NUMBER(num))) => *num,
-                    _ => 1,
+                let n ;
+                match tokens.get(2) {
+                    Some(Token::Value(KVValue::NUMBER(num))) => n = *num,
+                    _ => n = 1,
                 };
                 if let Some(KVValue::NUMBER(num)) = db.get(s) {
                     db.insert(s.clone(), KVValue::NUMBER(num + n));
